@@ -23,6 +23,6 @@ admin.site.index_title = 'Admin'
 urlpatterns = [
     path('admin/', admin.site.urls),
     path('article/', include('articles.urls')),
-    path('product/', include('store.urls')),
+    path('store/', include('store.urls')),
     path('auther/', include('authers.urls'))
 ]

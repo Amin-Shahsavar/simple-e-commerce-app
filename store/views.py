@@ -3,7 +3,7 @@ from django.db.models.aggregates import Count
 
 from rest_framework.filters import SearchFilter, OrderingFilter
 from rest_framework.viewsets import ModelViewSet, GenericViewSet
-from rest_framework.mixins import CreateModelMixin
+from rest_framework.mixins import CreateModelMixin, RetrieveModelMixin
 from rest_framework.response import Response
 from rest_framework import status
 
@@ -49,6 +49,11 @@ class ReviewViewSet(ModelViewSet):
         return {'product_id': self.kwargs['product_pk']}
 
 
-class CartViewSet(CreateModelMixin, GenericViewSet):
+class CartViewSet(CreateModelMixin,
+                  RetrieveModelMixin,
+                  GenericViewSet):
     queryset = Cart.objects.all()
     serializer_class = CartSerializer
+
+
+# class CartItemViewSet()
