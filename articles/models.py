@@ -34,6 +34,10 @@ class Article(models.Model):
         ordering = ['title']
 
 
+class Author(models.Model):
+    pass
+
+
 class Review(models.Model):
     article = models.ForeignKey(Article, on_delete=models.CASCADE)
     name = models.CharField(max_length=255)

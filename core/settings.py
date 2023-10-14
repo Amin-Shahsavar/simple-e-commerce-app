@@ -44,6 +44,7 @@ INSTALLED_APPS = [
     'authers',
     'tags',
     'likes',
+    'user',
 ]
 
 MIDDLEWARE = [
@@ -136,3 +137,5 @@ DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
 REST_FRAMEWORK = {
     'COERCE_DECIMA_TO_STRING': False,
 }
+
+AUTH_USER_MODEL = 'user.User'

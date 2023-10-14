@@ -3,12 +3,26 @@ from django.db.models.aggregates import Count
 
 from rest_framework.filters import SearchFilter, OrderingFilter
 from rest_framework.viewsets import ModelViewSet, GenericViewSet
-from rest_framework.mixins import CreateModelMixin, RetrieveModelMixin
+from rest_framework.mixins import (CreateModelMixin,
+                                   RetrieveModelMixin,
+                                   DestroyModelMixin)
 from rest_framework.response import Response
 from rest_framework import status
 
-from store.models import Product, Collection, Review, Cart, CartItem, Order, OrderItem
-from store.serializers import ProductSerializer, CollectionSerializer, ReviewSerializer, CartSerializer
+from store.models import (Product,
+                          Collection,
+                          Review,
+                          Cart,
+                          CartItem,
+                          Order,
+                          OrderItem)
+from store.serializers import (ProductSerializer,
+                               CollectionSerializer,
+                               ReviewSerializer,
+                               CartSerializer,
+                               CartItemSerializer,
+                               AddCartItemSerializer,
+                               UpdateCartItemSerializer)
 from store.filters import ProductFilter
 from store.pagination import DefaultPagination
 
@@ -24,7 +38,7 @@ class ProductViewSet(ModelViewSet):
 
     def destroy(self, request, *args, **kwargs):
         if OrderItem.objects.filter(product_id=kwargs['pk']).count() > 0:
-            return Response({'error': 'Product cannot be deleted because it is associated with an order item.'}, status=status.HTTP_405_METHOD_NOT_ALLOWED)
+            return Response({'error': 'Product cannot be deleted because it is associated with an order item.'},    status=status.HTTP_405_METHOD_NOT_ALLOWED)
         return super().destroy(request, *args, **kwargs)
 
 
@@ -51,9 +65,24 @@ class ReviewViewSet(ModelViewSet):
 
 class CartViewSet(CreateModelMixin,
                   RetrieveModelMixin,
+                  DestroyModelMixin,
                   GenericViewSet):
-    queryset = Cart.objects.all()
+    queryset = Cart.objects.prefetch_related('items__product').all()
     serializer_class = CartSerializer
 
 
-# class CartItemViewSet()
+class CartItemViewSet(ModelViewSet):
+    http_method_names = ['get', 'post', 'patch', 'delete']
+
+    def get_queryset(self):
+        return CartItem.objects.filter(cart_id=self.kwargs['cart_pk']).select_related('product')
+
+    def get_serializer_class(self):
+        if self.request.method == 'POST':
+            return AddCartItemSerializer
+        if self.request.method == 'PATCH':
+            return UpdateCartItemSerializer
+        return CartItemSerializer
+
+    def get_serializer_context(self):
+        return {'cart_id': self.kwargs['cart_pk']}
